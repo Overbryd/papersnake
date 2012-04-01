@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <title>Snake</title>
+    <script type="text/javascript" src="paper.js"></script>
+    <script type="text/paperscript" canvas="myCanvas">
+      function dropFood() {
+        var newCenter = [Math.round(Math.random()*view.bounds.right), Math.round(Math.random()*view.bounds.height)];
+        food.position = newCenter;
+        console.log(newCenter);
+      }
+
+      function stopSnake() {
+        clearInterval(timer);
+      }
+
+      function moveSnake() {
+        var previousPoint = new Point(segments[0].point);
+        segments[0].point = segments[0].point + direction;
+        for (var i = 1; i < size; i++) {
+          var tempPoint = new Point(segments[i].point);
+          segments[i].point = new Point(previousPoint.x, previousPoint.y);
+          previousPoint = tempPoint;
+        }
+      }
+
+      function collision() {
+        var nextPoint = segments[0].point + direction;
+        for (var i = 0; i < size-1; i++) {
+          if (nextPoint == segments[i].point) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function onTick() {
+        if (collision()) {
+          stopSnake();
+        } else {
+          direction = newDirection;
+          moveSnake();
+        }
+        view.draw();
+      }
+      var timer = setInterval(onTick, 500);
+
+      function onKeyUp(event) {
+        switch(event.key) {
+          case 'up':
+            if (direction[1] != 10) { // not down
+              newDirection = [0, -10];
+            }
+            break;
+          case 'down':
+            if (direction[1] != -10) {
+              newDirection = [0, 10];
+            }
+            break;
+          case 'left':
+            if (direction[0] != 10) {
+              newDirection = [-10, 0];
+            }
+            break;
+          case 'right':
+            if (direction[0] != -10) {
+              newDirection = [10, 0];
+            }
+            break;
+        }
+      }
+
+      var path = new Path();
+      path.style = {
+        strokeColor: '#E4141B',
+        strokeWidth: 8,
+        strokeCap: 'square'
+      };
+
+      var size = 10;
+      var segments = path.segments;
+      var start = view.center / [10, 1];
+
+      var point = start;
+      var direction = [0, 10];
+      var newDirection = direction;
+
+      // start
+      for (var i = 0; i < size; i++) {
+        path.add(start + new Point(i * 10, 0));
+      }
+      var food = new Path.Circle(new Point(0, 0), 4);
+      food.style = {
+        fillColor: '#ccc'
+      };
+      dropFood();
+
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas" resize></canvas>
+  </body>
+</html>
